@@ -1,7 +1,7 @@
 # NGO Aggregator
 
 A platform that collects information from different NGO websites and displays their data and events in one place.  
-Users can **donate** or **volunteer** for NGOs, while NGOs can **collaborate** and manage their profiles.
+Users can **donate** or **volunteer** for NGOs, while NGOs can **collaborate** and manage their profiles. 
 
 ---
 
@@ -24,6 +24,16 @@ Users can **donate** or **volunteer** for NGOs, while NGOs can **collaborate** a
 - **Scraping**: Playwright / Puppeteer + Queue workers
 - **Search**: Meilisearch
 - **Payments**: Stripe
-- **Auth**: Clerk / Firebase
+- **Auth**: Clerk / Firebase 
+
+---
+
+---
+
+## Authors
+
+- Amandeep
+- Asmit
+- Vishal Saini 
 
 ---
