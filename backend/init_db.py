@@ -19,9 +19,7 @@ def init_database():
         print("Creating tables...")
         db.create_all()
 
-        # -----------------------------
-        # 1️⃣ Categories
-        # -----------------------------
+        # Categories
         print("Seeding categories...")
         categories_data = [
             {'name': 'Education', 'slug': 'education', 'icon': '📚', 'description': 'Educational initiatives and literacy programs'},
@@ -39,9 +37,7 @@ def init_database():
         db.session.add_all(categories)
         db.session.commit()
 
-        # -----------------------------
-        # 2️⃣ Users (5 normal + 1 admin)
-        # -----------------------------
+        # Users (5 normal + 1 admin)
         print("Seeding users...")
         users = []
         for i in range(5):
@@ -58,9 +54,7 @@ def init_database():
         db.session.add_all(users)
         db.session.commit()
 
-        # -----------------------------
-        # 3️⃣ NGOs
-        # -----------------------------
+        # NGOs
         print("Creating NGOs...")
         ngo_names = [
             "Akshaya Patra Foundation",
@@ -109,9 +103,7 @@ def init_database():
             ngos.append(ngo)
         db.session.commit()
 
-        # -----------------------------
-        # 4️⃣ Office Bearers (2–4 per NGO)
-        # -----------------------------
+        # Office Bearers (2–4 per NGO)
         print("Adding office bearers...")
         designations = ["President", "Secretary", "Treasurer", "Member"]
         for ngo in ngos:
@@ -124,9 +116,7 @@ def init_database():
                 db.session.add(bearer)
         db.session.commit()
 
-        # -----------------------------
-        # 5️⃣ Blacklist Records (for 2 NGOs)
-        # -----------------------------
+        # Blacklist Records (for 2 NGOs)
         print("Seeding blacklist info...")
         blacklisted_ngos = random.sample(ngos, k=2)
         for ngo in blacklisted_ngos:
@@ -142,9 +132,7 @@ def init_database():
             db.session.add(record)
         db.session.commit()
 
-        # -----------------------------
-        # 6️⃣ Volunteer Posts
-        # -----------------------------
+        # Volunteer Posts
         print("Creating volunteer posts...")
         posts = []
         for ngo in ngos:
@@ -162,9 +150,7 @@ def init_database():
                 posts.append(post)
         db.session.commit()
 
-        # -----------------------------
-        # 7️⃣ Events
-        # -----------------------------
+        # Events
         print("Creating events...")
         for ngo in ngos:
             for j in range(random.randint(1, 2)):
@@ -179,9 +165,7 @@ def init_database():
                 db.session.add(event)
         db.session.commit()
 
-        # -----------------------------
-        # 8️⃣ Applications
-        # -----------------------------
+        # Applications
         print("Creating applications...")
         for _ in range(10):
             application = Application(
@@ -193,9 +177,7 @@ def init_database():
             db.session.add(application)
         db.session.commit()
 
-        # -----------------------------
-        # ✅ Summary
-        # -----------------------------
+        # Summary
         print("\n" + "=" * 70)
         print(" Database seeded successfully with sample data!")
         print("=" * 70)

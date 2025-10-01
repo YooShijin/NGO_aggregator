@@ -221,7 +221,7 @@ export default function ImpactPage() {
                   cy="50%"
                   outerRadius={120}
                   label={({ name, percent }) =>
-                    `${name}: ${(percent * 100).toFixed(0)}%`
+                    `${name}: ${((percent || 1) * 100).toFixed(0)}%`
                   }
                   labelLine={{ stroke: "#6b7280", strokeWidth: 1 }}
                 >
