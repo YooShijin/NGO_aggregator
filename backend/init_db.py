@@ -79,31 +79,7 @@ def init_database():
         districts = ["New Delhi", "Mumbai Suburban", "Bengaluru Urban", "Kolkata", "Pune", "Chennai", "Hyderabad", "Jaipur", "Lucknow", "Patna"]
 
         ngos = []
-        for i, name in enumerate(ngo_names):
-            ngo = NGO(
-                name=name,
-                registration_no=f"REG-{1000+i}",
-                darpan_id=f"BR/{i+1:05d}/2025",
-                mission=f"Empowering communities through {categories[i % len(categories)].name.lower()} programs.",
-                description=f"{name} focuses on creating measurable social impact across India.",
-                founded_year=1995 + random.randint(0, 20),
-                website=f"https://www.{name.split()[0].lower()}.org",
-                email=f"info@{name.split()[0].lower()}.org",
-                phone=f"+91-98{i}45678{i}",
-                address=f"{i+10} Charity Lane, {cities[i]}",
-                city=cities[i],
-                state=states[i],
-                district=districts[i],
-                registered_with=random.choice(["Registrar of Societies", "Registrar of Companies", "Charitable Trusts"]),
-                registration_date=date(2000 + random.randint(0, 20), random.randint(1, 12), random.randint(1, 28)),
-                act_name=random.choice(["Societies Registration Act, 1860", "Indian Trusts Act, 1882", "Companies Act, 2013"]),
-                type_of_ngo=random.choice(["Society", "Trust", "Section 8 Company"]),
-                transparency_score=random.randint(50, 100),
-                verified=random.choice([True, False]),
-                active=True,
-                scraped_at=datetime.utcnow(),
-                source="Seed Script"
-            )
+        #ADD FOR LOOP VISHAL
             ngo.categories = random.sample(categories, k=random.randint(1, 3))
             db.session.add(ngo)
             ngos.append(ngo)
@@ -196,23 +172,7 @@ def init_database():
         # -----------------------------
         # ✅ Summary
         # -----------------------------
-        print("\n" + "=" * 70)
-        print("🎉 Database seeded successfully with realistic sample data!")
-        print("=" * 70)
-        print(f"Categories:       {len(categories)}")
-        print(f"NGOs:             {len(ngos)}")
-        print(f"Office Bearers:   {OfficeBearer.query.count()}")
-        print(f"Blacklisted NGOs: {len(blacklisted_ngos)}")
-        print(f"Volunteer Posts:  {len(posts)}")
-        print(f"Users:            {len(users)}")
-        print("Admin credentials:")
-        print(f"  Email: {Config.ADMIN_EMAIL}")
-        print(f"  Password: {Config.ADMIN_PASSWORD}")
-        print("=" * 70)
-        print("✅ Next:")
-        print(" → Run the app: python app.py")
-        print(" → Check /api/ngos or /api/blacklisted to verify data.")
-        print("=" * 70)
+       #ADD PRINT STATEMENTS VISHAL
 
 if __name__ == "__main__":
     init_database()
