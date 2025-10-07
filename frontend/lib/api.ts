@@ -126,3 +126,73 @@ export const userAPI = {
   addLike: (ngo_id: number) => api.post("/user/likes", { ngo_id }),
   removeLike: (id: number) => api.delete(`/user/likes/${id}`),
 };
+
+
+// NGO API
+export const ngoAPI = {
+  getAll: (params?: any) => api.get("/ngos", { params }),
+  getById: (id: number) => api.get(`/ngos/${id}`),
+  getMapData: () => api.get("/ngos/map"),
+  requestAccount: (data: any) => api.post("/ngo/request", data),
+  getDashboard: () => api.get("/ngo/dashboard"),
+  createVolunteerPost: (data: any) => api.post("/ngo/volunteer-posts", data),
+  updateVolunteerPost: (id: number, data: any) =>
+    api.put(`/ngo/volunteer-posts/${id}`, data),
+  createEvent: (data: any) => api.post("/ngo/events", data),
+  updateApplicationStatus: (id: number, status: string) =>
+    api.put(`/ngo/applications/${id}/status`, { status }),
+};
+
+// Admin API
+export const adminAPI = {
+  getDashboard: () => api.get("/admin/dashboard"),
+  getNGORequests: (status?: string) =>
+    api.get("/admin/ngo-requests", { params: { status } }),
+  approveNGORequest: (id: number, password: string) =>
+    api.post(`/admin/ngo-requests/${id}/approve`, { password }),
+  rejectNGORequest: (id: number, reason: string) =>
+    api.post(`/admin/ngo-requests/${id}/reject`, { reason }),
+  verifyNGO: (id: number) => api.post(`/ngos/${id}/verify`),
+  blacklistNGO: (id: number, data: any) =>
+    api.post(`/ngos/${id}/blacklist`, data),
+  unblacklistNGO: (id: number) => api.post(`/ngos/${id}/unblacklist`),
+};
+
+// Category API
+export const categoryAPI = {
+  getAll: () => api.get("/categories"),
+};
+
+// Volunteer API
+export const volunteerAPI = {
+  getAll: (params?: any) => api.get("/volunteer-posts", { params }),
+  apply: (data: { volunteer_post_id: number; message: string }) =>
+    api.post("/applications", data),
+};
+
+// Event API
+export const eventAPI = {
+  getAll: (params?: any) => api.get("/events", { params }),
+};
+
+// Stats API
+export const statsAPI = {
+  get: () => api.get("/stats"),
+};
+
+// Blacklist API
+export const blacklistAPI = {
+  getAll: (params?: any) => api.get("/blacklisted", { params }),
+};
+
+// Search API
+export const searchAPI = {
+  search: (query: string) => api.get("/search", { params: { q: query } }),
+};
+
+// Chatbot API
+export const chatbotAPI = {
+  sendMessage: (message: string) => api.post("/chatbot", { message }),
+};
+
+export default api;
