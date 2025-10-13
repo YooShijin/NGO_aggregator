@@ -32,3 +32,26 @@ def user_dashboard(current_user):
             'likes_count': len(likes)
         }
     })
+
+
+@app.route('/api/user/bookmarks', methods=['POST'])
+@token_required
+def add_bookmark(current_user):
+    data = request.get_json()
+    
+    existing = Bookmark.query.filter_by(
+        user_id=current_user.id,
+        volunteer_post_id=data['volunteer_post_id']
+    ).first()
+    
+    if existing:
+        return jsonify({'message': 'Already bookmarked'}), 400
+    
+    bookmark = Bookmark(
+        user_id=current_user.id,
+        volunteer_post_id=data['volunteer_post_id']
+    )
+    db.session.add(bookmark)
+    db.session.commit()
+    
+    return jsonify({'message': 'Bookmark added'}), 201
