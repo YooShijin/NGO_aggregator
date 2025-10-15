@@ -43,3 +43,19 @@ class Bookmark(db.Model):
             'volunteer_post': self.volunteer_post.to_dict() if self.volunteer_post else None,
             'created_at': self.created_at.isoformat()
         }
+
+class Like(db.Model):
+    __tablename__ = 'likes'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    ngo_id = db.Column(db.Integer, db.ForeignKey('ngos.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'ngo': self.ngo.to_dict() if self.ngo else None,
+            'created_at': self.created_at.isoformat()
+        }
