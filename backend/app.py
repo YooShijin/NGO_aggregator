@@ -1,12 +1,19 @@
+from datetime import datetime, timedelta
+from functools import wraps
+
+import jwt
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from models import db
 
+from config import Config
 from models import (
     db,
     NGO,
     Category,
+    User,
+    VolunteerPost,
 )
+
 
 # basic flask app
 def create_app():
@@ -62,6 +69,41 @@ def _get_token_from_header():
 
     return token
 
+#---------------VOLUNTEERS ROUTES----------------------
+@app.route("/api/volunteer-posts", methods=["GET"])
+def get_volunteer_posts():
+    active_only = request.args.get("active", "true") == "true"
+
+    query = VolunteerPost.query.join(NGO).filter(NGO.blacklisted.is_(False))
+
+    if active_only:
+        query = query.filter(VolunteerPost.active.is_(True))
+
+    posts = query.order_by(VolunteerPost.created_at.desc()).all()
+
+    return jsonify([post.to_dict() for post in posts])
+
+
+@app.route("/api/volunteer-posts", methods=["POST"])
+@admin_required
+def create_volunteer_post(current_user):
+    data = request.get_json()
+
+    post = VolunteerPost(
+        ngo_id=data["ngo_id"],
+        title=data["title"],
+        description=data.get("description"),
+        requirements=data.get("requirements"),
+        location=data.get("location"),
+        deadline=datetime.fromisoformat(data["deadline"])
+        if data.get("deadline")
+        else None,
+    )
+
+    db.session.add(post)
+    db.session.commit()
+
+    return jsonify(post.to_dict()), 201
 
 #--------------- BASIC NGO ROUTES ----------------------
 
