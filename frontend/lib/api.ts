@@ -33,3 +33,30 @@ export interface Category {
   icon: string;
   description?: string;
 }
+
+export interface VolunteerPost {
+  id: number;
+  ngo_id: number;
+  ngo_name?: string;
+  title: string;
+  description?: string;
+  requirements?: string;
+  location?: string;
+  deadline?: string;
+  active: boolean;
+  created_at: string;
+  applications_count?: number;
+  bookmarks_count?: number;
+}
+
+export interface Event {
+  id: number;
+  ngo_id: number;
+  ngo_name?: string;
+  title: string;
+  description?: string;
+  event_date: string;
+  location?: string;
+  registration_link?: string;
+  created_at: string;
+}

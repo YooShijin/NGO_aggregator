@@ -69,6 +69,41 @@ def _get_token_from_header():
 
     return token
 
+#------------------- EVENTS ROUTES ---------------------
+
+@app.route("/api/events", methods=["GET"])
+def get_events():
+    upcoming = request.args.get("upcoming", "true") == "true"
+
+    query = Event.query.join(NGO).filter(NGO.blacklisted.is_(False))
+
+    if upcoming:
+        query = query.filter(Event.event_date >= datetime.utcnow())
+
+    events = query.order_by(Event.event_date).all()
+
+    return jsonify([event.to_dict() for event in events])
+
+
+@app.route("/api/events", methods=["POST"])
+@admin_required
+def create_event(current_user):
+    data = request.get_json()
+
+    event = Event(
+        ngo_id=data["ngo_id"],
+        title=data["title"],
+        description=data.get("description"),
+        event_date=datetime.fromisoformat(data["event_date"]),
+        location=data.get("location"),
+        registration_link=data.get("registration_link"),
+    )
+
+    db.session.add(event)
+    db.session.commit()
+
+    return jsonify(event.to_dict()), 201
+
 #---------------VOLUNTEERS ROUTES----------------------
 @app.route("/api/volunteer-posts", methods=["GET"])
 def get_volunteer_posts():
