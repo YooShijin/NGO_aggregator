@@ -77,3 +77,16 @@ def add_like(current_user):
     db.session.commit()
     
     return jsonify({'message': 'Like added'}), 201
+
+@app.route('/api/user/bookmarks/<int:id>', methods=['DELETE'])
+@token_required
+def remove_bookmark(current_user, id):
+    bookmark = Bookmark.query.filter_by(
+        user_id=current_user.id,
+        id=id
+    ).first_or_404()
+    
+    db.session.delete(bookmark)
+    db.session.commit()
+    
+    return jsonify({'message': 'Bookmark removed'})
