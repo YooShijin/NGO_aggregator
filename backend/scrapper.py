@@ -1,15 +1,20 @@
-# scrapper.py — PHASE 2
+# scrapper.py — PHASE 3
 import re
 from bs4 import BeautifulSoup
 
-HTML_FILE = "ngos.html"
+HTML_FILES = [
+    "ngos.html",
+    "ngos2.html",
+    "ngos3.html",
+    "ngos4.html",
+    "ngos5.html",
+    "ngos6.html",
+]
 
 
 def parse_ngos_from_file(html_path):
     """
-    Phase 2:
-    - Extract name, address, city, state, pincode, phone, mobile, email, website
-    - Still from a single HTML file
+    Same parsing logic, but now used for each HTML file.
     """
     with open(html_path, "r", encoding="windows-1252", errors="ignore") as f:
         html = f.read()
@@ -76,8 +81,20 @@ def parse_ngos_from_file(html_path):
     return ngos
 
 
+def load_all_ngos_from_html():
+    all_ngos = []
+    for path in HTML_FILES:
+        try:
+            ngos = parse_ngos_from_file(path)
+            all_ngos.extend(ngos)
+        except FileNotFoundError:
+            print(f"[!] File not found: {path} (skipping)")
+    print(f"[+] Total NGOs parsed from all files: {len(all_ngos)}")
+    return all_ngos
+
+
 def main():
-    ngos = parse_ngos_from_file(HTML_FILE)
+    ngos = load_all_ngos_from_html()
 
     for i, ngo in enumerate(ngos, start=1):
         print("=" * 80)
@@ -95,7 +112,7 @@ def main():
         if ngo["website"]:
             print(f"Website : {ngo['website']}")
     print("=" * 80)
-    print(f"Total NGOs: {len(ngos)}")
+    print(f"Total NGOs across all files: {len(ngos)}")
 
 
 if __name__ == "__main__":
