@@ -191,3 +191,28 @@ class VolunteerPost(db.Model):
             'applications_count': len(self.applications),
             'bookmarks_count': len(self.bookmarks)
         }
+    
+class Event(db.Model):
+    __tablename__ = 'events'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    ngo_id = db.Column(db.Integer, db.ForeignKey('ngos.id'), nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text)
+    event_date = db.Column(db.DateTime, nullable=False)
+    location = db.Column(db.String(255))
+    registration_link = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'ngo_id': self.ngo_id,
+            'ngo_name': self.ngo.name if self.ngo else None,
+            'title': self.title,
+            'description': self.description,
+            'event_date': self.event_date.isoformat() if self.event_date else None,
+            'location': self.location,
+            'registration_link': self.registration_link,
+            'created_at': self.created_at.isoformat()
+        }

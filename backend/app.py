@@ -12,6 +12,8 @@ from models import (
     Category,
     User,
     VolunteerPost,
+    Event,
+    Application
 )
 
 
@@ -68,6 +70,96 @@ def _get_token_from_header():
         token = token[7:]
 
     return token
+
+
+def token_required(f):
+    """Decorator for routes that need a valid logged-in user."""
+
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = _get_token_from_header()
+
+        if not token:
+            return jsonify({"message": "Token is missing"}), 401
+
+        try:
+            data = jwt.decode(
+                token,
+                app.config["SECRET_KEY"],
+                algorithms=["HS256"],
+            )
+            current_user = User.query.get(data["user_id"])
+
+            if not current_user:
+                return jsonify({"message": "User not found"}), 401
+
+        except Exception:
+            return jsonify({"message": "Token is invalid"}), 401
+
+        return f(current_user, *args, **kwargs)
+
+    return decorated
+
+
+#-------------------APPLICATION ROUTES --------------
+
+@app.route("/api/applications", methods=["POST"])
+@token_required
+def create_application(current_user):
+    """User applies for a volunteer position."""
+    data = request.get_json()
+
+    existing = Application.query.filter_by(
+        user_id=current_user.id,
+        volunteer_post_id=data["volunteer_post_id"],
+    ).first()
+
+    if existing:
+        return (
+            jsonify(
+                {"message": "You have already applied for this position"},
+            ),
+            400,
+        )
+
+    application = Application(
+        user_id=current_user.id,
+        volunteer_post_id=data["volunteer_post_id"],
+        message=data.get("message", ""),
+        status="pending",
+    )
+
+    db.session.add(application)
+    db.session.commit()
+
+    return jsonify(application.to_dict()), 201
+
+
+@app.route("/api/applications/<int:id>", methods=["GET"])
+@token_required
+def get_application(current_user, id):
+    """Return details of a specific application."""
+    application = Application.query.get_or_404(id)
+
+    if application.user_id != current_user.id and current_user.role != "ngo":
+        return jsonify({"message": "Unauthorized"}), 403
+
+    return jsonify(application.to_dict())
+
+
+@app.route("/api/applications/<int:id>", methods=["DELETE"])
+@token_required
+def delete_application(current_user, id):
+    """User withdraws their own application."""
+    application = Application.query.get_or_404(id)
+
+    if application.user_id != current_user.id:
+        return jsonify({"message": "Unauthorized"}), 403
+
+    db.session.delete(application)
+    db.session.commit()
+
+    return jsonify({"message": "Application withdrawn successfully"})
 
 #------------------- EVENTS ROUTES ---------------------
 
