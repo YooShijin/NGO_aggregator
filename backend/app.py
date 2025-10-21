@@ -30,6 +30,43 @@ def create_app():
 app = create_app()
 
 
+# ---------------------- MAP DATA ---------------------- #
+
+@app.route("/api/ngos/map", methods=["GET"])
+def get_ngos_map_data():
+    """Return NGOs with coordinates for frontend maps."""
+    exclude_blacklisted = request.args.get("exclude_blacklisted", "true") == "true"
+
+    query = NGO.query.filter(
+        NGO.active.is_(True),
+        NGO.latitude.isnot(None),
+        NGO.longitude.isnot(None),
+    )
+
+    if exclude_blacklisted:
+        query = query.filter(NGO.blacklisted.is_(False))
+
+    ngos = query.all()
+
+    map_data = []
+    for ngo in ngos:
+        map_data.append(
+            {
+                "id": ngo.id,
+                "name": ngo.name,
+                "lat": ngo.latitude,
+                "lng": ngo.longitude,
+                "city": ngo.city,
+                "state": ngo.state,
+                "verified": ngo.verified,
+                "blacklisted": ngo.blacklisted,
+                "categories": [cat.name for cat in ngo.categories],
+            }
+        )
+
+    return jsonify(map_data)
+
+
 #------------------ AUTH HELPERS --------------------------
 def admin_required(f):
     """Decorator for routes that only admins can access."""
