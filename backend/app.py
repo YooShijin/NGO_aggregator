@@ -13,7 +13,11 @@ from models import (
     User,
     VolunteerPost,
     Event,
-    Application
+    Application,
+    BlacklistRecord,
+    Bookmark,
+    Like,
+    NGORequest,
 )
 
 
@@ -28,6 +32,74 @@ def create_app():
     return app
 
 app = create_app()
+
+# ---------------------- STATS ROUTES ---------------------- #
+
+@app.route("/api/stats", methods=["GET"])
+def get_stats():
+    total_ngos = NGO.query.filter_by(active=True, blacklisted=False).count()
+    verified_ngos = NGO.query.filter_by(
+        active=True,
+        verified=True,
+        blacklisted=False,
+    ).count()
+    blacklisted_ngos = NGO.query.filter_by(blacklisted=True).count()
+
+    total_volunteers = (
+        VolunteerPost.query.join(NGO)
+        .filter(
+            VolunteerPost.active.is_(True),
+            NGO.blacklisted.is_(False),
+        )
+        .count()
+    )
+
+    upcoming_events = (
+        Event.query.join(NGO)
+        .filter(
+            Event.event_date >= datetime.utcnow(),
+            NGO.blacklisted.is_(False),
+        )
+        .count()
+    )
+
+    categories_data = []
+    for category in Category.query.all():
+        count = len(
+            [ngo for ngo in category.ngos if ngo.active and not ngo.blacklisted]
+        )
+        if count > 0:
+            categories_data.append(
+                {
+                    "name": category.name,
+                    "count": count,
+                }
+            )
+
+    states_data = (
+        db.session.query(NGO.state, db.func.count(NGO.id))
+        .filter(
+            NGO.active.is_(True),
+            NGO.blacklisted.is_(False),
+            NGO.state.isnot(None),
+        )
+        .group_by(NGO.state)
+        .all()
+    )
+
+    return jsonify(
+        {
+            "total_ngos": total_ngos,
+            "verified_ngos": verified_ngos,
+            "blacklisted_ngos": blacklisted_ngos,
+            "total_volunteers": total_volunteers,
+            "upcoming_events": upcoming_events,
+            "categories": categories_data,
+            "states": [
+                {"name": state, "count": count} for state, count in states_data
+            ],
+        }
+    )
 
 
 # ---------------------- MAP DATA ---------------------- #
