@@ -1,4 +1,4 @@
-# scrapper.py — PHASE 3
+# scrapper.py — PHASE 4
 import re
 from bs4 import BeautifulSoup
 
@@ -12,10 +12,18 @@ HTML_FILES = [
 ]
 
 
+def decode_cfemail(cfstring: str) -> str:
+    """
+    Decode Cloudflare's email protection value from data-cfemail.
+    """
+    r = int(cfstring[:2], 16)
+    email = "".join(
+        chr(int(cfstring[i : i + 2], 16) ^ r) for i in range(2, len(cfstring), 2)
+    )
+    return email
+
+
 def parse_ngos_from_file(html_path):
-    """
-    Same parsing logic, but now used for each HTML file.
-    """
     with open(html_path, "r", encoding="windows-1252", errors="ignore") as f:
         html = f.read()
 
@@ -55,13 +63,25 @@ def parse_ngos_from_file(html_path):
         if m:
             mobile = m.group(1).strip(" /")
 
-        m = re.search(r"Email:\s*([^\s<]+@[^\s<]+)", details_text)
-        if m:
-            email = m.group(1).strip()
+        # Cloudflare protected email
+        email_a = div.find("a", class_="__cf_email__")
+        if email_a and email_a.get("data-cfemail"):
+            cf = email_a["data-cfemail"]
+            email = decode_cfemail(cf)
+        else:
+            m = re.search(r"Email:\s*([^\s<]+@[^\s<]+)", details_text)
+            if m:
+                email = m.group(1).strip()
 
         m = re.search(r"Website:\s*([^\s<]+)", details_text)
         if m:
             website = m.group(1).strip()
+        else:
+            for a in div.find_all("a", href=True):
+                href = a["href"]
+                if href.startswith("http") or "www." in href:
+                    website = href.strip()
+                    break
 
         ngos.append(
             {
