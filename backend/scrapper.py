@@ -1,6 +1,10 @@
-# scrapper.py — PHASE 4
 import re
+from datetime import datetime
+
 from bs4 import BeautifulSoup
+
+from app import create_app
+from models import db, NGO
 
 HTML_FILES = [
     "ngos.html",
@@ -13,9 +17,6 @@ HTML_FILES = [
 
 
 def decode_cfemail(cfstring: str) -> str:
-    """
-    Decode Cloudflare's email protection value from data-cfemail.
-    """
     r = int(cfstring[:2], 16)
     email = "".join(
         chr(int(cfstring[i : i + 2], 16) ^ r) for i in range(2, len(cfstring), 2)
@@ -28,7 +29,6 @@ def parse_ngos_from_file(html_path):
         html = f.read()
 
     soup = BeautifulSoup(html, "html.parser")
-
     ngo_divs = soup.select("div.lay-1.donor-menories-bg")
     ngos = []
 
@@ -63,7 +63,6 @@ def parse_ngos_from_file(html_path):
         if m:
             mobile = m.group(1).strip(" /")
 
-        # Cloudflare protected email
         email_a = div.find("a", class_="__cf_email__")
         if email_a and email_a.get("data-cfemail"):
             cf = email_a["data-cfemail"]
@@ -113,26 +112,45 @@ def load_all_ngos_from_html():
     return all_ngos
 
 
-def main():
-    ngos = load_all_ngos_from_html()
+def save_ngos_to_db(ngos_data):
+    created = 0
 
-    for i, ngo in enumerate(ngos, start=1):
+    for data in ngos_data:
+        ngo = NGO(
+            name=data["name"],
+            address=data["address"],
+            city=data["city"],
+            state=data["state"],
+            district=None,
+            email=data["email"],
+            phone=data["phone"],
+            website=data["website"],
+            verified=False,
+            active=True,
+            source="Mohan Foundation (HTML scrape)",
+            scraped_at=datetime.utcnow(),
+        )
+        db.session.add(ngo)
+        created += 1
+
+    db.session.commit()
+    return created
+
+
+def main():
+    app = create_app()
+
+    with app.app_context():
         print("=" * 80)
-        print(f"NGO #{i}")
-        print(f"Name    : {ngo['name']}")
-        print(f"Address : {ngo['address']}")
-        print(f"City    : {ngo['city']}")
-        print(f"State   : {ngo['state']}")
-        print(f"Pincode : {ngo['pincode']}")
-        print(f"Phone   : {ngo['phone']}")
-        if ngo["mobile"]:
-            print(f"Mobile  : {ngo['mobile']}")
-        if ngo["email"]:
-            print(f"Email   : {ngo['email']}")
-        if ngo["website"]:
-            print(f"Website : {ngo['website']}")
-    print("=" * 80)
-    print(f"Total NGOs across all files: {len(ngos)}")
+        print("  🏥 Importing Mohan Foundation NGOs into the database")
+        print("=" * 80)
+
+        ngos_data = load_all_ngos_from_html()
+        created = save_ngos_to_db(ngos_data)
+
+        print("\n" + "=" * 80)
+        print(f"✅ Inserted NGOs into DB: {created}")
+        print("=" * 80)
 
 
 if __name__ == "__main__":
