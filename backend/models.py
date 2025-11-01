@@ -10,7 +10,6 @@ ngo_categories = db.Table('ngo_categories',
     db.Column('category_id', db.Integer, db.ForeignKey('categories.id'), primary_key=True)
 )
 
-
 class NGO(db.Model):
     __tablename__ = 'ngos'
     
@@ -98,66 +97,91 @@ class NGO(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
-    
 
-class Application(db.Model):
-    __tablename__ = 'applications'
+class Category(db.Model):
+    __tablename__ = 'categories'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    volunteer_post_id = db.Column(db.Integer, db.ForeignKey('volunteer_posts.id'), nullable=False)
-    message = db.Column(db.Text)
-    status = db.Column(db.String(50), default='pending')  # pending, accepted, rejected
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    slug = db.Column(db.String(100), unique=True, nullable=False)
+    icon = db.Column(db.String(50))
+    description = db.Column(db.Text)
     
     def to_dict(self):
         return {
             'id': self.id,
-            'user_id': self.user_id,
-            'user_name': self.user.name if self.user else None,
-            'user_email': self.user.email if self.user else None,
-            'volunteer_post_id': self.volunteer_post_id,
-            'volunteer_post_title': self.volunteer_post.title if self.volunteer_post else None,
-            'ngo_name': self.volunteer_post.ngo.name if self.volunteer_post and self.volunteer_post.ngo else None,
-            'message': self.message,
-            'status': self.status,
-            'created_at': self.created_at.isoformat()
-        }
-    
-
-class Bookmark(db.Model):
-    __tablename__ = 'bookmarks'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    volunteer_post_id = db.Column(db.Integer, db.ForeignKey('volunteer_posts.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'volunteer_post': self.volunteer_post.to_dict() if self.volunteer_post else None,
-            'created_at': self.created_at.isoformat()
+            'name': self.name,
+            'slug': self.slug,
+            'icon': self.icon,
+            'description': self.description
         }
 
-class Like(db.Model):
-    __tablename__ = 'likes'
+class OfficeBearer(db.Model):
+    __tablename__ = 'office_bearers'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     ngo_id = db.Column(db.Integer, db.ForeignKey('ngos.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    name = db.Column(db.String(255), nullable=False)
+    designation = db.Column(db.String(100))
     
     def to_dict(self):
         return {
             'id': self.id,
-            'user_id': self.user_id,
-            'ngo': self.ngo.to_dict() if self.ngo else None,
+            'name': self.name,
+            'designation': self.designation
+        }
+
+class BlacklistRecord(db.Model):
+    __tablename__ = 'blacklist_records'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    ngo_id = db.Column(db.Integer, db.ForeignKey('ngos.id'), nullable=False, unique=True)
+    blacklisted_by = db.Column(db.String(255))
+    blacklist_date = db.Column(db.Date)
+    reason = db.Column(db.Text)
+    wef_date = db.Column(db.Date)
+    last_updated = db.Column(db.Date)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'ngo_id': self.ngo_id,
+            'blacklisted_by': self.blacklisted_by,
+            'blacklist_date': self.blacklist_date.isoformat() if self.blacklist_date else None,
+            'reason': self.reason,
+            'wef_date': self.wef_date.isoformat() if self.wef_date else None,
+            'last_updated': self.last_updated.isoformat() if self.last_updated else None
+        }
+
+class User(db.Model):
+    __tablename__ = 'users'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    name = db.Column(db.String(255))
+    role = db.Column(db.String(50), default='user')  # user, ngo, admin
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    applications = db.relationship('Application', backref='user', lazy=True)
+    bookmarks = db.relationship('Bookmark', backref='user', lazy=True, cascade='all, delete-orphan')
+    likes = db.relationship('Like', backref='user', lazy=True, cascade='all, delete-orphan')
+    
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'email': self.email,
+            'name': self.name,
+            'role': self.role,
             'created_at': self.created_at.isoformat()
         }
-    
-
 
 class VolunteerPost(db.Model):
     __tablename__ = 'volunteer_posts'
@@ -191,7 +215,7 @@ class VolunteerPost(db.Model):
             'applications_count': len(self.applications),
             'bookmarks_count': len(self.bookmarks)
         }
-    
+
 class Event(db.Model):
     __tablename__ = 'events'
     
@@ -214,5 +238,101 @@ class Event(db.Model):
             'event_date': self.event_date.isoformat() if self.event_date else None,
             'location': self.location,
             'registration_link': self.registration_link,
+            'created_at': self.created_at.isoformat()
+        }
+
+class Application(db.Model):
+    __tablename__ = 'applications'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    volunteer_post_id = db.Column(db.Integer, db.ForeignKey('volunteer_posts.id'), nullable=False)
+    message = db.Column(db.Text)
+    status = db.Column(db.String(50), default='pending')  # pending, accepted, rejected
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'user_name': self.user.name if self.user else None,
+            'user_email': self.user.email if self.user else None,
+            'volunteer_post_id': self.volunteer_post_id,
+            'volunteer_post_title': self.volunteer_post.title if self.volunteer_post else None,
+            'ngo_name': self.volunteer_post.ngo.name if self.volunteer_post and self.volunteer_post.ngo else None,
+            'message': self.message,
+            'status': self.status,
+            'created_at': self.created_at.isoformat()
+        }
+
+class Bookmark(db.Model):
+    __tablename__ = 'bookmarks'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    volunteer_post_id = db.Column(db.Integer, db.ForeignKey('volunteer_posts.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'volunteer_post': self.volunteer_post.to_dict() if self.volunteer_post else None,
+            'created_at': self.created_at.isoformat()
+        }
+
+class Like(db.Model):
+    __tablename__ = 'likes'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    ngo_id = db.Column(db.Integer, db.ForeignKey('ngos.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'ngo': self.ngo.to_dict() if self.ngo else None,
+            'created_at': self.created_at.isoformat()
+        }
+
+class NGORequest(db.Model):
+    __tablename__ = 'ngo_requests'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(255), nullable=False)
+    phone = db.Column(db.String(50))
+    registration_no = db.Column(db.String(100), nullable=False)
+    darpan_id = db.Column(db.String(100))
+    address = db.Column(db.Text)
+    city = db.Column(db.String(100))
+    state = db.Column(db.String(100))
+    mission = db.Column(db.Text)
+    description = db.Column(db.Text)
+    website = db.Column(db.String(255))
+    documents = db.Column(db.JSON)  # Store document URLs
+    status = db.Column(db.String(50), default='pending')  # pending, approved, rejected
+    rejection_reason = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'email': self.email,
+            'phone': self.phone,
+            'registration_no': self.registration_no,
+            'darpan_id': self.darpan_id,
+            'address': self.address,
+            'city': self.city,
+            'state': self.state,
+            'mission': self.mission,
+            'description': self.description,
+            'website': self.website,
+            'documents': self.documents,
+            'status': self.status,
+            'rejection_reason': self.rejection_reason,
             'created_at': self.created_at.isoformat()
         }
