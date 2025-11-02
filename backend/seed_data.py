@@ -374,3 +374,27 @@ def seed_database():
                 db.session.add(post)
                 print(f"Created volunteer post: {post_data['title']}")
         
+        # Seed events
+        events_data = [
+            {
+                'title': 'Annual Charity Run',
+                'description': 'Join our 10K run to raise funds for children\'s education',
+                'event_date': datetime.now() + timedelta(days=15),
+                'location': 'Mumbai',
+                'registration_link': 'https://example.com/register'
+            },
+            {
+                'title': 'Teacher Training Workshop',
+                'description': 'Workshop for volunteer teachers on effective teaching methods',
+                'event_date': datetime.now() + timedelta(days=25),
+                'location': 'Bengaluru',
+                'registration_link': 'https://example.com/workshop'
+            },
+            {
+                'title': 'Health Awareness Campaign',
+                'description': 'Community health awareness and free checkup camp',
+                'event_date': datetime.now() + timedelta(days=10),
+                'location': 'Delhi',
+                'registration_link': 'https://example.com/health-camp'
+            }
+        ]
