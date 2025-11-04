@@ -398,3 +398,22 @@ def seed_database():
                 'registration_link': 'https://example.com/health-camp'
             }
         ]
+        
+        for i, event_data in enumerate(events_data):
+            if i < len(created_ngos) and not created_ngos[i].blacklisted:
+                event = Event(ngo_id=created_ngos[i].id, **event_data)
+                db.session.add(event)
+                print(f"Created event: {event_data['title']}")
+        
+        db.session.commit()
+        
+        print("\n" + "="*50)
+        print("Database seeding completed successfully!")
+        print(f"Total NGOs: {len(created_ngos)}")
+        print(f"Blacklisted NGOs: {sum(1 for ngo in created_ngos if ngo.blacklisted)}")
+        print(f"Volunteer Posts: {len(volunteer_posts_data)}")
+        print(f"Events: {len(events_data)}")
+        print("="*50)
+
+if __name__ == '__main__':
+    seed_database()
