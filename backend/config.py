@@ -5,15 +5,14 @@ load_dotenv()
 
 class Config:
     # Database
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'postgres://user:asmit2003@localhost/trading?sslmode=disable/ngo_aggregator')
-    
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/ngo_aggregator')  
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Flask
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     
     # API Keys
-    GEM_API_KEY = os.getenv('GEM_API_KEY')
+    GEM_API_KEY = os.getenv('GEM_API_KEY', 'AIzaSyBv9vjdkjUfDLEa8KXqzFl17WGZeFtNoTI')
     
     # Admin
     ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'admin@example.com')
