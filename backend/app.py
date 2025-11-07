@@ -6,7 +6,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 from config import Config
-from ai_services import ai_service
+from ai_service import ai_service
 from models import (
     db,
     NGO,
