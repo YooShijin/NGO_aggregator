@@ -1,31 +1,21 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import {
-  Heart,
-  Menu,
-  X,
-  Home,
-  Building2,
-  Users,
-  Calendar,
-  BarChart3,
-  AlertTriangle,
-} from "lucide-react";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import Link from 'next/link';
+import { Heart, Menu, X, Home, Building2, Users, Calendar, BarChart3, AlertTriangle } from 'lucide-react';
+import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
   const navLinks = [
-    { href: "/", label: "Home", icon: Home },
-    { href: "/ngos", label: "NGOs", icon: Building2 },
-    { href: "/volunteer", label: "Volunteer", icon: Users },
-    { href: "/events", label: "Events", icon: Calendar },
-    { href: "/impact", label: "Impact", icon: BarChart3 },
-    { href: "/blacklisted", label: "Blacklisted", icon: AlertTriangle },
+    { href: '/', label: 'Home', icon: Home },
+    { href: '/ngos', label: 'NGOs', icon: Building2 },
+    { href: '/volunteer', label: 'Volunteer', icon: Users },
+    { href: '/events', label: 'Events', icon: Calendar },
+    { href: '/impact', label: 'Impact', icon: BarChart3 },
+    { href: '/blacklisted', label: 'Blacklisted', icon: AlertTriangle },
   ];
 
   return (
@@ -41,9 +31,7 @@ export default function Navbar() {
                 <span className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
                   NGO Portal
                 </span>
-                <div className="text-xs text-gray-500 font-medium">
-                  Social Impact Platform
-                </div>
+                <div className="text-xs text-gray-500 font-medium">Social Impact Platform</div>
               </div>
             </Link>
           </div>
@@ -59,8 +47,8 @@ export default function Navbar() {
                   href={link.href}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all ${
                     isActive
-                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                      : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -76,11 +64,7 @@ export default function Navbar() {
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors"
             >
-              {isOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
-              )}
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
@@ -99,8 +83,8 @@ export default function Navbar() {
                   href={link.href}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all ${
                     isActive
-                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
+                      : 'text-gray-700 hover:bg-gray-100'
                   }`}
                   onClick={() => setIsOpen(false)}
                 >
