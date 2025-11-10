@@ -295,3 +295,43 @@ def seed_database():
                 }
             }
         ]
+        
+        # Create NGOs
+        created_ngos = []
+        for ngo_data in ngos_data:
+            # Extract related data
+            cat_names = ngo_data.pop('categories', [])
+            bearers_data = ngo_data.pop('office_bearers', [])
+            blacklist_data = ngo_data.pop('blacklist_info', None)
+            
+            # Check if exists
+            existing = NGO.query.filter_by(darpan_id=ngo_data.get('darpan_id')).first()
+            if existing:
+                print(f"Skipping {ngo_data['name']} - already exists")
+                continue
+            
+            # Create NGO
+            ngo = NGO(**ngo_data)
+            
+            # Add categories
+            for cat_name in cat_names:
+                if cat_name in categories_map:
+                    ngo.categories.append(categories_map[cat_name])
+            
+            db.session.add(ngo)
+            db.session.flush()  # Get ID
+            
+            # Add office bearers
+            for bearer_data in bearers_data:
+                bearer = OfficeBearer(ngo_id=ngo.id, **bearer_data)
+                db.session.add(bearer)
+            
+            # Add blacklist record if blacklisted
+            if blacklist_data:
+                blacklist_record = BlacklistRecord(ngo_id=ngo.id, **blacklist_data)
+                db.session.add(blacklist_record)
+            
+            created_ngos.append(ngo)
+            print(f"Created NGO: {ngo.name}")
+        
+        db.session.commit()
