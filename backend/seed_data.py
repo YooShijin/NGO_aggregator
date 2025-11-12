@@ -335,3 +335,35 @@ def seed_database():
             print(f"Created NGO: {ngo.name}")
         
         db.session.commit()
+        
+        # Seed volunteer posts
+        volunteer_posts_data = [
+            {
+                'title': 'Teaching Volunteers Needed',
+                'description': 'Help teach underprivileged children basic subjects like English and Math',
+                'requirements': 'Good communication skills, patience, passion for teaching',
+                'location': 'Mumbai, Maharashtra',
+                'deadline': datetime.now() + timedelta(days=30)
+            },
+            {
+                'title': 'Food Distribution Volunteers',
+                'description': 'Assist in preparing and distributing meals to children',
+                'requirements': 'Physical fitness, team player, weekend availability',
+                'location': 'Bengaluru, Karnataka',
+                'deadline': datetime.now() + timedelta(days=45)
+            },
+            {
+                'title': 'Healthcare Camp Assistants',
+                'description': 'Support medical camps in rural areas',
+                'requirements': 'Medical background preferred, empathy, dedication',
+                'location': 'Delhi',
+                'deadline': datetime.now() + timedelta(days=20)
+            },
+            {
+                'title': 'Elderly Care Volunteers',
+                'description': 'Spend time with elderly people, assist with daily activities',
+                'requirements': 'Patience, compassion, good listener',
+                'location': 'Chennai, Tamil Nadu',
+                'deadline': datetime.now() + timedelta(days=60)
+            }
+        ]
