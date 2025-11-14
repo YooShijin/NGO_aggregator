@@ -10,6 +10,10 @@ import {
   MapPin,
   Shield,
   AlertTriangle,
+  LogIn,
+  UserPlus,
+  Building2,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -22,7 +26,6 @@ import {
 } from "@/lib/api";
 import dynamic from "next/dynamic";
 
-// Dynamic import for map to avoid SSR issues
 const NGOMap = dynamic(() => import("../components/NGOMap"), { ssr: false });
 
 export default function Home() {
@@ -31,9 +34,13 @@ export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [mapNGOs, setMapNGOs] = useState<MapNGO[]>([]);
   const [showBlacklistModal, setShowBlacklistModal] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     loadData();
+    // Check if user is logged in
+    const user = localStorage.getItem("user");
+    setIsLoggedIn(!!user);
   }, []);
 
   const loadData = async () => {
@@ -60,9 +67,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Hero Section with modern gradient */}
+      {/* Hero Section */}
       <div className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white py-24 overflow-hidden">
-        {/* Background decoration */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full filter blur-3xl"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full filter blur-3xl"></div>
@@ -88,8 +94,8 @@ export default function Home() {
               impact
             </p>
 
-            {/* Enhanced Search Bar */}
-            <form onSubmit={handleSearch} className="max-w-3xl mx-auto">
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="max-w-3xl mx-auto mb-8">
               <div className="relative flex items-center bg-white rounded-2xl shadow-2xl overflow-hidden">
                 <Search className="absolute left-6 w-6 h-6 text-gray-400" />
                 <input
@@ -108,8 +114,35 @@ export default function Home() {
               </div>
             </form>
 
+            {/* Auth CTAs - Show only if not logged in */}
+            {!isLoggedIn && (
+              <div className="flex flex-wrap gap-4 justify-center mb-8">
+                <Link
+                  href="/auth/login"
+                  className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white px-8 py-4 rounded-xl font-bold hover:bg-white/30 transition-all"
+                >
+                  <LogIn className="w-5 h-5" />
+                  Login to Your Account
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="inline-flex items-center gap-2 bg-white text-indigo-600 px-8 py-4 rounded-xl font-bold hover:bg-indigo-50 transition-all shadow-xl"
+                >
+                  <UserPlus className="w-5 h-5" />
+                  Create Account
+                </Link>
+                <Link
+                  href="/auth/ngo-register"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-8 py-4 rounded-xl font-bold transition-all shadow-xl"
+                >
+                  <Building2 className="w-5 h-5" />
+                  Register NGO
+                </Link>
+              </div>
+            )}
+
             {/* Quick Actions */}
-            <div className="mt-8 flex flex-wrap gap-4 justify-center">
+            <div className="flex flex-wrap gap-4 justify-center">
               <button
                 onClick={() => setShowBlacklistModal(true)}
                 className="inline-flex items-center gap-2 bg-red-500/20 backdrop-blur-sm border border-red-300 text-white px-6 py-3 rounded-xl font-medium hover:bg-red-500/30 transition-all"
@@ -122,7 +155,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Stats Section with modern cards */}
+      {/* Stats Section */}
       {stats && (
         <div className="py-16 -mt-12 relative z-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -201,6 +234,86 @@ export default function Home() {
         </div>
       )}
 
+      {/* Features Section - New */}
+      <div className="py-16 bg-gradient-to-b from-white to-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              How It Works
+            </h2>
+            <p className="text-xl text-gray-600">
+              Join thousands making a difference
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all border-2 border-indigo-100 hover:border-indigo-300">
+              <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+                <UserPlus className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">
+                Create Account
+              </h3>
+              <p className="text-gray-600 text-center">
+                Sign up as a volunteer or register your NGO to get started
+              </p>
+              {!isLoggedIn && (
+                <div className="mt-6 text-center">
+                  <Link
+                    href="/auth/register"
+                    className="inline-flex items-center gap-2 text-indigo-600 font-semibold hover:text-indigo-700"
+                  >
+                    Get Started <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all border-2 border-purple-100 hover:border-purple-300">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+                <Search className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">
+                Discover & Connect
+              </h3>
+              <p className="text-gray-600 text-center">
+                Browse verified NGOs and volunteer opportunities that match your
+                interests
+              </p>
+              <div className="mt-6 text-center">
+                <Link
+                  href="/ngos"
+                  className="inline-flex items-center gap-2 text-purple-600 font-semibold hover:text-purple-700"
+                >
+                  Explore NGOs <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all border-2 border-green-100 hover:border-green-300">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+                <Heart className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">
+                Make Impact
+              </h3>
+              <p className="text-gray-600 text-center">
+                Volunteer, donate, or partner with NGOs to create lasting social
+                change
+              </p>
+              <div className="mt-6 text-center">
+                <Link
+                  href="/volunteer"
+                  className="inline-flex items-center gap-2 text-green-600 font-semibold hover:text-green-700"
+                >
+                  Start Helping <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Interactive Map Section */}
       <div className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -223,7 +336,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Categories Section with hover effects */}
+      {/* Categories Section */}
       <div className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -254,7 +367,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* CTA Section with gradient */}
+      {/* CTA Section */}
       <div className="py-20 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full filter blur-3xl"></div>

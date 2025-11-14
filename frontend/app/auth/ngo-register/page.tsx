@@ -1,4 +1,3 @@
-// app/auth/ngo-register/page.tsx
 "use client";
 
 import { useState } from "react";
