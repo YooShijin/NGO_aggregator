@@ -367,3 +367,10 @@ def seed_database():
                 'deadline': datetime.now() + timedelta(days=60)
             }
         ]
+        
+        for i, post_data in enumerate(volunteer_posts_data):
+            if i < len(created_ngos) and not created_ngos[i].blacklisted:
+                post = VolunteerPost(ngo_id=created_ngos[i].id, **post_data)
+                db.session.add(post)
+                print(f"Created volunteer post: {post_data['title']}")
+        
