@@ -20,7 +20,6 @@ from models import (
     NGORequest,
 )
 
-
 # ---------------------- APP FACTORY ---------------------- 
 
 def create_app():
