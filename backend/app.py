@@ -6,6 +6,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 from config import Config
+from ai_services import ai_service
 from models import (
     db,
     NGO,
@@ -20,7 +21,8 @@ from models import (
     NGORequest,
 )
 
-# ---------------------- APP FACTORY ---------------------- 
+
+# ---------------------- APP FACTORY ---------------------- #
 
 def create_app():
     """Basic Flask app setup with config, DB and CORS."""
@@ -35,7 +37,8 @@ def create_app():
 
 app = create_app()
 
-# ---------------------- AUTH HELPERS ---------------------- 
+
+# ---------------------- AUTH HELPERS ---------------------- #
 
 def _get_token_from_header():
     """Extract raw JWT token from the Authorization header."""
@@ -137,7 +140,7 @@ def ngo_required(f):
     return decorated
 
 
-# ---------------------- AUTH ROUTES ----------------------
+# ---------------------- AUTH ROUTES ---------------------- #
 
 @app.route("/api/auth/register", methods=["POST"])
 def register():
@@ -191,7 +194,7 @@ def get_current_user(current_user):
     return jsonify(current_user.to_dict())
 
 
-# ---------------------- USER DASHBOARD & ACTIONS ----------------------
+# ---------------------- USER DASHBOARD & ACTIONS ---------------------- #
 
 @app.route("/api/user/dashboard", methods=["GET"])
 @token_required
@@ -298,7 +301,7 @@ def remove_like(current_user, id):
     return jsonify({"message": "Like removed"})
 
 
-# ---------------------- NGO DASHBOARD & ACTIONS ----------------------
+# ---------------------- NGO DASHBOARD & ACTIONS ---------------------- #
 
 @app.route("/api/ngo/request", methods=["POST"])
 def request_ngo_account():
@@ -462,7 +465,7 @@ def ngo_update_application_status(current_user, id):
     return jsonify(application.to_dict())
 
 
-# ---------------------- ADMIN DASHBOARD ----------------------
+# ---------------------- ADMIN DASHBOARD ---------------------- #
 
 @app.route("/api/admin/dashboard", methods=["GET"])
 @admin_required
@@ -553,7 +556,68 @@ def reject_ngo_request(current_user, id):
     return jsonify({"message": "NGO request rejected"})
 
 
-# ---------------------- NGO ROUTES ----------------------
+# ---------------------- CHATBOT ROUTE ---------------------- #
+
+@app.route("/api/chatbot", methods=["POST"])
+def chatbot():
+    """AI chatbot that answers platform/NGO related questions."""
+    data = request.get_json()
+    message = data.get("message", "")
+
+    if not ai_service.client:
+        return jsonify(
+            {
+                "response": "Chatbot is currently unavailable. Please try again later."
+            }
+        )
+
+    try:
+        ngos_count = NGO.query.filter_by(active=True, blacklisted=False).count()
+        categories = Category.query.all()
+
+        context = f"""You are a helpful assistant for an NGO aggregator platform.
+
+Platform Info:
+- Total active NGOs: {ngos_count}
+- Categories: {', '.join([cat.name for cat in categories])}
+
+Answer questions about:
+1. Finding NGOs by category or location
+2. Volunteer opportunities
+3. How to donate or get involved
+4. NGO verification process
+5. Platform features
+
+Be helpful, concise, and friendly."""
+
+        response = ai_service.client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": context},
+                {"role": "user", "content": message},
+            ],
+            model="mixtral-8x7b-32768",
+            max_tokens=300,
+            temperature=0.7,
+        )
+
+        return jsonify(
+            {
+                "response": response.choices[0].message.content.strip(),
+            }
+        )
+
+    except Exception:
+        return (
+            jsonify(
+                {
+                    "response": "Sorry, I encountered an error. Please try again.",
+                }
+            ),
+            500,
+        )
+
+
+# ---------------------- NGO ROUTES ---------------------- #
 
 @app.route("/api/ngos", methods=["GET"])
 def get_ngos():
@@ -681,7 +745,7 @@ def verify_ngo(current_user, id):
     return jsonify({"message": "NGO verified successfully"})
 
 
-# ---------------------- BLACKLIST ROUTES ----------------------
+# ---------------------- BLACKLIST ROUTES ---------------------- #
 
 @app.route("/api/blacklisted", methods=["GET"])
 def get_blacklisted_ngos():
@@ -758,7 +822,7 @@ def unblacklist_ngo(current_user, id):
     return jsonify({"message": "NGO removed from blacklist"})
 
 
-# ---------------------- CATEGORY ROUTES ----------------------
+# ---------------------- CATEGORY ROUTES ---------------------- #
 
 @app.route("/api/categories", methods=["GET"])
 def get_categories():
@@ -766,7 +830,7 @@ def get_categories():
     return jsonify([cat.to_dict() for cat in categories])
 
 
-# ---------------------- VOLUNTEER ROUTES ----------------------
+# ---------------------- VOLUNTEER ROUTES ---------------------- #
 
 @app.route("/api/volunteer-posts", methods=["GET"])
 def get_volunteer_posts():
@@ -804,7 +868,7 @@ def create_volunteer_post(current_user):
     return jsonify(post.to_dict()), 201
 
 
-# ---------------------- EVENT ROUTES ----------------------
+# ---------------------- EVENT ROUTES ---------------------- #
 
 @app.route("/api/events", methods=["GET"])
 def get_events():
@@ -840,7 +904,7 @@ def create_event(current_user):
     return jsonify(event.to_dict()), 201
 
 
-# ---------------------- MAP DATA ----------------------
+# ---------------------- MAP DATA ---------------------- #
 
 @app.route("/api/ngos/map", methods=["GET"])
 def get_ngos_map_data():
@@ -877,7 +941,7 @@ def get_ngos_map_data():
     return jsonify(map_data)
 
 
-# ---------------------- STATS ROUTES ----------------------
+# ---------------------- STATS ROUTES ---------------------- #
 
 @app.route("/api/stats", methods=["GET"])
 def get_stats():
@@ -946,7 +1010,7 @@ def get_stats():
     )
 
 
-# ---------------------- SEARCH ROUTE ----------------------
+# ---------------------- SEARCH ROUTE ---------------------- #
 
 @app.route("/api/search", methods=["GET"])
 def search():
@@ -973,7 +1037,7 @@ def search():
     return jsonify({"results": [ngo.to_dict() for ngo in ngos]})
 
 
-# ---------------------- APPLICATION ROUTES ----------------------
+# ---------------------- APPLICATION ROUTES ---------------------- #
 
 @app.route("/api/applications", methods=["POST"])
 @token_required
@@ -1034,7 +1098,7 @@ def delete_application(current_user, id):
     return jsonify({"message": "Application withdrawn successfully"})
 
 
-# ---------------------- ENTRY POINT ----------------------
+# ---------------------- ENTRY POINT ---------------------- #
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
