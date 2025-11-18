@@ -53,21 +53,21 @@ class AIService:
     def calculate_transparency_score(self, ngo):
         score = 0
 
-        # Basic info (30 points)
+        # Basic info - 30 points
         if ngo.name: score += 5
         if ngo.mission: score += 10
         if ngo.description: score += 15
 
-        # Contact info (20 points)
+        # Contact info - 20 points
         if ngo.email: score += 10
         if ngo.phone: score += 5
         if ngo.website: score += 5
 
-        # Location (20 points)
+        # Location - 20 points
         if ngo.address: score += 10
         if ngo.city and ngo.state: score += 10
 
-        # Verification (30 points)
+        # Verification - 30 points
         if ngo.registration_no: score += 20
         if ngo.verified: score += 10
 
