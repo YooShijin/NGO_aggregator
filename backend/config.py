@@ -13,7 +13,7 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     
     # API Keys
-    GEM_API_KEY = os.getenv('GEM_API_KEY', 'AIzaSyBv9vjdkjUfDLEa8KXqzFl17WGZeFtNoTI')
+    GEM_API_KEY = os.getenv('GEM_API_KEY')
     
     # Admin
     ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'admin@example.com')
