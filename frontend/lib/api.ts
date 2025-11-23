@@ -127,7 +127,6 @@ export const userAPI = {
   removeLike: (id: number) => api.delete(`/user/likes/${id}`),
 };
 
-
 // NGO API
 export const ngoAPI = {
   getAll: (params?: any) => api.get("/ngos", { params }),
