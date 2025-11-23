@@ -32,3 +32,48 @@ def user_dashboard(current_user):
             'likes_count': len(likes)
         }
     })
+
+
+@app.route('/api/user/bookmarks', methods=['POST'])
+@token_required
+def add_bookmark(current_user):
+    data = request.get_json()
+    
+    existing = Bookmark.query.filter_by(
+        user_id=current_user.id,
+        volunteer_post_id=data['volunteer_post_id']
+    ).first()
+    
+    if existing:
+        return jsonify({'message': 'Already bookmarked'}), 400
+    
+    bookmark = Bookmark(
+        user_id=current_user.id,
+        volunteer_post_id=data['volunteer_post_id']
+    )
+    db.session.add(bookmark)
+    db.session.commit()
+    
+    return jsonify({'message': 'Bookmark added'}), 201
+
+@app.route('/api/user/likes', methods=['POST'])
+@token_required
+def add_like(current_user):
+    data = request.get_json()
+    
+    existing = Like.query.filter_by(
+        user_id=current_user.id,
+        ngo_id=data['ngo_id']
+    ).first()
+    
+    if existing:
+        return jsonify({'message': 'Already liked'}), 400
+    
+    like = Like(
+        user_id=current_user.id,
+        ngo_id=data['ngo_id']
+    )
+    db.session.add(like)
+    db.session.commit()
+    
+    return jsonify({'message': 'Like added'}), 201
