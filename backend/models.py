@@ -156,3 +156,38 @@ class Like(db.Model):
             'ngo': self.ngo.to_dict() if self.ngo else None,
             'created_at': self.created_at.isoformat()
         }
+    
+
+
+class VolunteerPost(db.Model):
+    __tablename__ = 'volunteer_posts'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    ngo_id = db.Column(db.Integer, db.ForeignKey('ngos.id'), nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text)
+    requirements = db.Column(db.Text)
+    location = db.Column(db.String(255))
+    deadline = db.Column(db.Date)
+    active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    applications = db.relationship('Application', backref='volunteer_post', lazy=True)
+    bookmarks = db.relationship('Bookmark', backref='volunteer_post', lazy=True, cascade='all, delete-orphan')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'ngo_id': self.ngo_id,
+            'ngo_name': self.ngo.name if self.ngo else None,
+            'title': self.title,
+            'description': self.description,
+            'requirements': self.requirements,
+            'location': self.location,
+            'deadline': self.deadline.isoformat() if self.deadline else None,
+            'active': self.active,
+            'created_at': self.created_at.isoformat(),
+            'applications_count': len(self.applications),
+            'bookmarks_count': len(self.bookmarks)
+        }
